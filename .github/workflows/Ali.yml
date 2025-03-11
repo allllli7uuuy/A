@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Downloading & Installing Essentials
         run: |
-          Invoke-WebRequest -Uri "https://gitlab.com/Ali-157/rdp/-/raw/main/Downloads.bat" -OutFile "Downloads.bat"
+          Invoke-WebRequest -Uri "https://gitlab.com/Ali-157/testing/-/raw/main/Downloads.bat" -OutFile "Downloads.bat"
           cmd /c Downloads.bat
 
       - name: Show Website
