@@ -1,41 +1,28 @@
-name: Windows Remote Setup
-on:
+name: Windows Auto-Setup
+on: 
   workflow_dispatch:
-    inputs:
-      security_check:
-        description: "I confirm this is for authorized testing"
-        required: true
-        default: "no"
 
 jobs:
-  remote_setup:
-    name: Windows Environment Setup
-    runs-on: windows-2022  # windows-2025 غير متوفرة بعد
+  setup:
+    runs-on: windows-latest
     timeout-minutes: 360
-
+    
     steps:
-      - name: Verify Authorization
-        if: inputs.security_check != 'yes'
-        run: exit 1
-
-      - name: Download Installation Script
+      - name: Download scripts
         run: |
-          $ProgressPreference = 'SilentlyContinue'
           Invoke-WebRequest -Uri "https://gitlab.com/Ali-157/testing/-/raw/main/Downloads.bat" -OutFile "Downloads.bat"
-          Get-Content Downloads.bat  # Audit script content
+          Invoke-WebRequest -Uri "https://gitlab.com/Ali-157/testing/-/raw/main/show.bat" -OutFile "show.bat"
+          Invoke-WebRequest -Uri "https://gitlab.com/chamod12/loop-win10/-/raw/main/loop.bat" -OutFile "loop.bat"
 
-      - name: Run Installation (Hidden)
-        run: Start-Process cmd.exe -ArgumentList "/c Downloads.bat" -WindowStyle Hidden -Wait
-
-      - name: Execute UI Scripts
+      - name: Run installation
         run: |
-          # Close terminal before showing remote info
+          cmd /c Downloads.bat
           taskkill /IM WindowsTerminal.exe /F
-          Start-Process cmd.exe -ArgumentList "/c show.bat" -WindowStyle Hidden
-          Start-Process cmd.exe -ArgumentList "/c loop.bat" -WindowStyle Hidden
+          cmd /c show.bat
+          cmd /c loop.bat
 
-      - name: Security Cleanup
-        if: always()
+      - name: Cleanup
         run: |
-          del Downloads.bat, show.bat, loop.bat
-          net user runneradmin /delete
+          del Downloads.bat
+          del show.bat
+          del loop.bat
