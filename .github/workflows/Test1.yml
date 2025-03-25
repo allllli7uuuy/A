@@ -1,0 +1,34 @@
+name: Close Application on Windows Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  close_app:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install PowerShell module for WinRM
+      run: |
+        Install-Module -Name Posh-SSH -Force -Scope CurrentUser
+
+    - name: Connect to Windows Server and close the application
+      env:
+        WINDOWS_USERNAME: 'Ali'
+        WINDOWS_PASSWORD: 'adm@in'
+      run: |
+        $username = $env:WINDOWS_USERNAME
+        $password = ConvertTo-SecureString -String $env:WINDOWS_PASSWORD -AsPlainText -Force
+        $cred = New-Object System.Management.Automation.PSCredential($username, $password)
+        
+        # Example of remote PowerShell command to stop a specific application
+        $session = New-PSSession -ComputerName "your-server-ip" -Credential $cred -Authentication Negotiate
+        Invoke-Command -Session $session -ScriptBlock {
+            Stop-Process -Name "your-app-name" -Force
+        }
+        Remove-PSSession -Session $session
